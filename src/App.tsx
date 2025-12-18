@@ -4,8 +4,22 @@ import type { GameCard } from "./game/types";
 import { generateDeck } from "./game/deckGenerator";
 import './styles/styles.css'
 
+function getSeed(): number {
+  const params = new URLSearchParams(window.location.search);
+  const seedParam = params.get("seed");
+
+  if (seedParam) return Number(seedParam);
+
+  const newSeed = Math.floor(Math.random() * 1e9);
+  params.set("seed", newSeed.toString());
+  window.history.replaceState(null, "", `?${params.toString()}`);
+
+  return newSeed;
+}
+
 export default function App() {
-  const [deck, setDeck] = useState<GameCard[]>(generateDeck());
+  const seed = getSeed();
+  const [deck, setDeck] = useState<GameCard[]>(generateDeck(seed));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [, setPlayed] = useState<GameCard[]>([]);
   const [, setDiscarded] = useState<GameCard[]>([]);
@@ -46,12 +60,18 @@ export default function App() {
   }, [currentIndex, deck.length, skipped]);
 
   function restartGame() {
-    setDeck(generateDeck());
+    const newSeed = Math.floor(Math.random() * 1e9);
+    const params = new URLSearchParams(window.location.search);
+    params.set("seed", newSeed.toString());
+    window.history.replaceState(null, "", `?${params.toString()}`);
+
+    setDeck(generateDeck(newSeed));
     setCurrentIndex(0);
+    setSkipped([]);
     setPlayed([]);
     setDiscarded([]);
-    setSkipped([]);
   }
+
 
   return (
     <div className="app">
