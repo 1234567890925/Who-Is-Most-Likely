@@ -14,22 +14,36 @@ export default function App() {
   const currentCard = deck[currentIndex];
 
   function handleAction(action: "played" | "discarded" | "skipped") {
-    if (!currentCard) return;
+    const card = deck[currentIndex];
+    if (!card) return;
 
-    if (action === "played") setPlayed(p => [...p, currentCard]);
-    if (action === "discarded") setDiscarded(d => [...d, currentCard]);
-    if (action === "skipped") setSkipped(s => [...s, currentCard]);
+    if (action === "played") {
+      setPlayed(p => [...p, card]);
+    }
 
+    if (action === "discarded") {
+      setDiscarded(d => [...d, card]);
+    }
+
+    if (action === "skipped") {
+      setSkipped(s => [...s, card]);
+    }
+
+    // Move forward in deck — card is now gone forever
     setCurrentIndex(i => i + 1);
   }
 
   useEffect(() => {
-    if (currentIndex >= deck.length && skipped.length > 0) {
-      setDeck(shuffle(skipped));
-      setSkipped([]);
-      setCurrentIndex(0);
+    // End of deck
+    if (currentIndex >= deck.length) {
+      if (skipped.length > 0) {
+        // Only skipped cards come back
+        setDeck(shuffle(skipped));
+        setSkipped([]);
+        setCurrentIndex(0);
+      }
     }
-  }, [currentIndex, deck, skipped]);
+  }, [currentIndex, deck.length, skipped]);
 
   function restartGame() {
     setDeck(generateDeck());
